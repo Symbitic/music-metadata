@@ -58,14 +58,15 @@ export class Format implements IGetToken<IWaveFormat> {
     this.len = header.chunkSize;
   }
 
-  public get(buf: Buffer, off: number): IWaveFormat {
+  public get(buf: Uint8Array, off: number): IWaveFormat {
+    const view = new DataView(buf.buffer);
     return {
-      wFormatTag: buf.readUInt16LE(off),
-      nChannels: buf.readUInt16LE(off + 2),
-      nSamplesPerSec: buf.readUInt32LE(off + 4),
-      nAvgBytesPerSec: buf.readUInt32LE(off + 8),
-      nBlockAlign: buf.readUInt16LE(off + 12),
-      wBitsPerSample: buf.readUInt16LE(off + 14)
+      wFormatTag: view.getUint16(off, true),
+      nChannels: view.getUint16(off + 2, true),
+      nSamplesPerSec: view.getUint32(off + 4, true),
+      nAvgBytesPerSec: view.getUint32(off + 8, true),
+      nBlockAlign: view.getUint16(off + 12, true),
+      wBitsPerSample: view.getUint16(off + 14, true)
     };
   }
 }
@@ -90,9 +91,10 @@ export class FactChunk implements IGetToken<IFactChunk> {
     this.len = header.chunkSize;
   }
 
-  public get(buf: Buffer, off: number): IFactChunk {
+  public get(buf: Uint8Array, off: number): IFactChunk {
+    const view = new DataView(buf.buffer);
     return {
-      dwSampleLength: buf.readUInt32LE(off)
+      dwSampleLength: view.getUint32(off, true)
     };
   }
 

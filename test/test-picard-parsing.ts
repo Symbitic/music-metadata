@@ -30,7 +30,7 @@ describe('Parsing of metadata saved by \'Picard\' in audio files', () => {
     }
   }
 
-  function calcHash(buf: Buffer): string {
+  function calcHash(buf: Uint8Array): string {
     const hash = crypto.createHash('md5');
     hash.update(buf);
     return hash.digest('hex');
@@ -336,7 +336,7 @@ describe('Parsing of metadata saved by \'Picard\' in audio files', () => {
       t.deepEqual(native.TMED, ['CD'], 'id3v23.TMED: Media type');
       t.deepEqual(native.UFID[0], {
         owner_identifier: 'http://musicbrainz.org',
-        identifier: Buffer.from('f151cb94-c909-46a8-ad99-fb77391abfb8', 'ascii')
+        identifier: new TextEncoder().encode('f151cb94-c909-46a8-ad99-fb77391abfb8')
       }, 'id3v23.UFID: Unique file identifier');
 
       t.deepEqual(native.IPLS, [{

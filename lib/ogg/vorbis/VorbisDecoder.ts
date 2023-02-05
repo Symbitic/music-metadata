@@ -1,4 +1,5 @@
 import * as Token from 'token-types';
+import { convertToUTF8 } from "../../common/Util.js";
 
 export class VorbisDecoder {
 
@@ -13,7 +14,7 @@ export class VorbisDecoder {
 
   public readStringUtf8(): string {
     const len = this.readInt32();
-    const value = Buffer.from(this.data).toString('utf-8', this.offset, this.offset + len);
+    const value = convertToUTF8(this.data, this.offset, this.offset + len);
     this.offset += len;
     return value;
   }

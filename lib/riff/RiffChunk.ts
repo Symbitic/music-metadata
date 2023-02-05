@@ -1,4 +1,5 @@
 import * as Token from 'token-types';
+import { convertToBinaryString } from "../common/Util.js";
 import { IGetToken } from 'strtok3/core';
 import { IChunkHeader } from '../iff/index.js';
 
@@ -10,10 +11,10 @@ export { IChunkHeader } from '../iff/index.js';
 export const Header: IGetToken<IChunkHeader> = {
   len: 8,
 
-  get: (buf: Buffer, off): IChunkHeader => {
+  get: (buf: Uint8Array, off): IChunkHeader => {
     return {
       // Group-ID
-      chunkID: buf.toString('binary', off, off + 4),
+      chunkID: convertToBinaryString(buf, off, off + 4),
       // Size
       chunkSize: Token.UINT32_LE.get(buf, 4)
     };

@@ -206,7 +206,7 @@ export class ID3v2Parser {
 
       case 2:
         header = {
-          id: Buffer.from(uint8Array.slice(0, 3)).toString('ascii'),
+          id: util.convertToAsciiString(uint8Array.slice(0, 3)),
           length: Token.UINT24_BE.get(uint8Array, 3)
         };
         if (!header.id.match(/[A-Z0-9]{3}/g)) {
@@ -217,7 +217,7 @@ export class ID3v2Parser {
       case 3:
       case 4:
         header = {
-          id:  Buffer.from(uint8Array.slice(0, 4)).toString('ascii'),
+          id:  util.convertToAsciiString(uint8Array.slice(0, 4)),
           length: (majorVer === 4 ?  UINT32SYNCSAFE : Token.UINT32_BE).get(uint8Array, 4),
           flags: ID3v2Parser.readFrameFlags(uint8Array.slice(8, 10))
         };

@@ -1,5 +1,6 @@
 import * as Token from 'token-types';
 
+import { convertToHexString } from "../common/Util.js"
 import { APEv2Parser } from '../apev2/APEv2Parser.js';
 import { FourCcToken } from '../common/FourCC.js';
 import { BasicParser } from '../common/BasicParser.js';
@@ -73,8 +74,9 @@ export class WavPackParser extends BasicParser {
     while (remainingLength > WavPack.MetadataIdToken.len) {
       const id = await this.tokenizer.readToken<IMetadataId>(WavPack.MetadataIdToken);
       const dataSizeInWords = await this.tokenizer.readNumber(id.largeBlock ? Token.UINT24_LE : Token.UINT8);
-      const data = Buffer.alloc(dataSizeInWords * 2 - (id.isOddSize ? 1 : 0));
-      await this.tokenizer.readBuffer(data);
+      const data = new Uint8Array(dataSizeInWords * 2 - (id.isOddSize ? 1 : 0));
+      await this.tokenizer.readBuffer(data as any);
+      const view = new DataView(data.buffer);
       debug(`Metadata Sub-Blocks functionId=0x${id.functionId.toString(16)}, id.largeBlock=${id.largeBlock},data-size=${data.length}`);
       switch (id.functionId) {
         case 0x0: // ID_DUMMY: could be used to pad WavPack blocks
@@ -83,7 +85,7 @@ export class WavPackParser extends BasicParser {
         case 0xe: // ID_DSD_BLOCK
           debug('ID_DSD_BLOCK');
           // https://github.com/dbry/WavPack/issues/71#issuecomment-483094813
-          const mp = 1 << data.readUInt8(0);
+          const mp = 1 << view.getUint8(0);
           const samplingRate = header.flags.samplingRate * mp * 8; // ToDo: second factor should be read from DSD-metadata block https://github.com/dbry/WavPack/issues/71#issuecomment-483094813
           if (!header.flags.isDSD)
             throw new Error('Only expect DSD block if DSD-flag is set');
@@ -100,7 +102,7 @@ export class WavPackParser extends BasicParser {
           break;
 
         case 0x2f: // ID_BLOCK_CHECKSUM
-          debug(`ID_BLOCK_CHECKSUM: checksum=${data.toString('hex')}`);
+          debug(`ID_BLOCK_CHECKSUM: checksum=${convertToHexString(data)}`);
           break;
 
         default:

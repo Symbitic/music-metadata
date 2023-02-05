@@ -42,24 +42,25 @@ export const Header: IGetToken<IHeader> = {
 
   len: 80,
 
-  get: (buf: Buffer, off) => {
-
+  get: (buf: Uint8Array, off) => {
+    const view = new DataView(buf.buffer);
+    //view.getInt32(off + 36, true)
     return {
       speex: new Token.StringType(8, 'ascii').get(buf, off + 0),
       version: util.trimRightNull(new Token.StringType(20, 'ascii').get(buf, off + 8)),
-      version_id: buf.readInt32LE(off + 28),
-      header_size: buf.readInt32LE(off + 32),
-      rate: buf.readInt32LE(off + 36),
-      mode: buf.readInt32LE(off + 40),
-      mode_bitstream_version: buf.readInt32LE(off + 44),
-      nb_channels: buf.readInt32LE(off + 48),
-      bitrate: buf.readInt32LE(off + 52),
-      frame_size: buf.readInt32LE(off + 56),
-      vbr: buf.readInt32LE(off + 60),
-      frames_per_packet: buf.readInt32LE(off + 64),
-      extra_headers: buf.readInt32LE(off + 68),
-      reserved1: buf.readInt32LE(off + 72),
-      reserved2: buf.readInt32LE(off + 76)
+      version_id: view.getInt32(off + 28, true),
+      header_size: view.getInt32(off + 32, true),
+      rate: view.getInt32(off + 36, true),
+      mode: view.getInt32(off + 40, true),
+      mode_bitstream_version: view.getInt32(off + 44, true),
+      nb_channels: view.getInt32(off + 48, true),
+      bitrate: view.getInt32(off + 52, true),
+      frame_size: view.getInt32(off + 56, true),
+      vbr: view.getInt32(off + 60, true),
+      frames_per_packet: view.getInt32(off + 64, true),
+      extra_headers: view.getInt32(off + 68, true),
+      reserved1: view.getInt32(off + 72, true),
+      reserved2: view.getInt32(off + 76, true)
     };
   }
 };

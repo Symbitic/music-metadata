@@ -59,6 +59,73 @@ function swapBytes<T extends Uint8Array>(uint8Array: T): T {
   return uint8Array;
 }
 
+//import {convertToUTF16LE, convertFromAB, copyUint8Array, convertToBinaryString, convertFromBinaryString, readUintBE, convertToAsciiString, convertToHexString, convertToUTF8, convertFromBase64, concat } from "../Utils";
+
+export function convertToUTF16LE(buf: Uint8Array): string {
+  return new TextDecoder('utf-16le').decode(buf);
+}
+
+export function convertFromAB(ab: ArrayBuffer): Uint8Array {
+  return new Uint8Array(ab);
+}
+
+export function copyUint8Array(buf: Uint8Array): Uint8Array {
+  return new Uint8Array(buf);
+}
+
+export function convertToBinaryString(buf: Uint8Array, start?: number, end?: number): string {
+  return Array.from(buf.slice(start, end)).map((i) => String.fromCharCode(i)).join('');
+}
+
+export function convertFromBinaryString(str: string): Uint8Array {
+  return new Uint8Array(str.split('').map(char => char.charCodeAt(0)));
+}
+
+export function readUintBE(buf: Uint8Array, start: number, end: number): number {
+  let value = 0;
+  for (let i = start; i < end; i++) {
+    value = (value << 8) + buf[i];
+  }
+  return value;
+}
+
+export function convertToAsciiString(buf: Uint8Array): string {
+  return new TextDecoder('ascii').decode(buf);
+}
+
+export function convertToHexString(buf: Uint8Array): string {
+  let hex = '';
+  for (let i = 0; i < buf.length; i++) {
+    hex += buf[i].toString(16).padStart(2, '0');
+  }
+  return hex;
+}
+
+export function convertToUTF8(buf: Uint8Array, start?: number, end?: number): string {
+  return new TextDecoder('utf-8').decode(buf.slice(start, end));
+}
+
+export function convertToLatin1(buf: Uint8Array, start?: number, end?: number): string {
+  return new TextDecoder('latin1').decode(buf.slice(start, end));
+}
+
+export function convertFromBase64(base64str: string): Uint8Array {
+  return new Uint8Array(atob(base64str).split('').map(char => char.charCodeAt(0)));
+}
+
+export function concat(data: Uint8Array[]): Uint8Array {
+  let totalLength = 0;
+  for (const buf of data) {
+    totalLength += buf.length;
+  }
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const buf of data) {
+    result.set(buf, offset);
+    offset += buf.length;
+  }
+  return result;
+}
 
 /**
  * Decode string

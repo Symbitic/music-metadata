@@ -31,16 +31,18 @@ export interface IIdentificationHeader {
 export const IdentificationHeader: IGetToken<IIdentificationHeader> = {
   len: 42,
 
-  get: (buf: Buffer, off): IIdentificationHeader => {
+  get: (buf: Uint8Array, off): IIdentificationHeader => {
+    const view = new DataView(buf.buffer);
+    //view.getUint16(off + 10)
     return {
       id: new Token.StringType(7, 'ascii').get(buf, off),
-      vmaj: buf.readUInt8(off + 7),
-      vmin: buf.readUInt8(off + 8),
-      vrev: buf.readUInt8(off + 9),
-      vmbw: buf.readUInt16BE(off + 10),
-      vmbh: buf.readUInt16BE(off + 17),
+      vmaj: view.getUint8(off + 7),
+      vmin: view.getUint8(off + 8),
+      vrev: view.getUint8(off + 9),
+      vmbw: view.getUint16(off + 10, false),
+      vmbh: view.getUint16(off + 17, false),
       nombr: Token.UINT24_BE.get(buf, off + 37),
-      nqual: buf.readUInt8(off + 40)
+      nqual: view.getUint8(off + 40)
     };
   }
 };

@@ -1,4 +1,5 @@
 import * as Token from 'token-types';
+import * as util from "../../common/Util.js";
 
 import { AttachedPictureType } from '../../id3v2/ID3v2Token.js';
 
@@ -34,10 +35,10 @@ export interface IVorbisPicture extends IPicture {
 export class VorbisPictureToken implements IGetToken<IVorbisPicture> {
 
   public static fromBase64(base64str: string): IVorbisPicture {
-    return this.fromBuffer(Buffer.from(base64str, 'base64'));
+    return this.fromBuffer(util.convertFromBase64(base64str));
   }
 
-  public static fromBuffer(buffer: Buffer): IVorbisPicture {
+  public static fromBuffer(buffer: Uint8Array): IVorbisPicture {
     const pic = new VorbisPictureToken(buffer.length);
     return pic.get(buffer, 0);
   }
@@ -45,15 +46,15 @@ export class VorbisPictureToken implements IGetToken<IVorbisPicture> {
   constructor(public len) {
   }
 
-  public get(buffer: Buffer, offset: number): IVorbisPicture {
+  public get(buffer: Uint8Array, offset: number): IVorbisPicture {
 
     const type = AttachedPictureType[Token.UINT32_BE.get(buffer, offset)];
 
     const mimeLen = Token.UINT32_BE.get(buffer, offset += 4);
-    const format = buffer.toString('utf-8', offset += 4, offset + mimeLen);
+    const format = util.convertToUTF8(buffer, offset += 4, offset + mimeLen);
 
     const descLen = Token.UINT32_BE.get(buffer, offset += mimeLen);
-    const description = buffer.toString('utf-8', offset += 4, offset + descLen);
+    const description = util.convertToUTF8(buffer, offset += 4, offset + descLen);
 
     const width = Token.UINT32_BE.get(buffer, offset += descLen);
     const height = Token.UINT32_BE.get(buffer, offset += 4);
@@ -61,7 +62,7 @@ export class VorbisPictureToken implements IGetToken<IVorbisPicture> {
     const indexed_color = Token.UINT32_BE.get(buffer, offset += 4);
 
     const picDataLen = Token.UINT32_BE.get(buffer, offset += 4);
-    const data = Buffer.from(buffer.slice(offset += 4, offset + picDataLen));
+    const data = buffer.slice(offset += 4, offset + picDataLen);
 
     return {
       type,
@@ -103,9 +104,10 @@ export interface ICommonHeader {
 export const CommonHeader: IGetToken<ICommonHeader> = {
   len: 7,
 
-  get: (buf: Buffer, off): ICommonHeader => {
+  get: (buf: Uint8Array, off): ICommonHeader => {
+    const view = new DataView(buf.buffer)
     return {
-      packetType: buf.readUInt8(off),
+      packetType: view.getUint8(off),
       vorbis: new Token.StringType(6, 'ascii').get(buf, off + 1)
     };
   }

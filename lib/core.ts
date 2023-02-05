@@ -23,7 +23,7 @@ export function parseStream(stream: Readable, fileInfo?: strtok3.IFileInfo | str
 }
 
 /**
- * Parse audio from Node Buffer
+ * Parse audio from a Uint8Array buffer.
  * @param uint8Array - Uint8Array holding audio data
  * @param fileInfo - File information object or MIME-type string
  * @param options - Parsing options

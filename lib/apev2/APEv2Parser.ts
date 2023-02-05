@@ -1,7 +1,6 @@
 import initDebug from 'debug';
 import * as strtok3 from 'strtok3/core';
 import { StringType } from 'token-types';
-import { Buffer } from 'node:buffer';
 
 import * as util from '../common/Util.js';
 import { IOptions, IRandomReader, IApeHeader } from '../type.js';
@@ -56,7 +55,7 @@ export class APEv2Parser extends BasicParser {
    */
   public static async findApeFooterOffset(reader: IRandomReader, offset: number): Promise<IApeHeader> {
     // Search for APE footer header at the end of the file
-    const apeBuf = Buffer.alloc(TagFooter.len);
+    const apeBuf = new Uint8Array(TagFooter.len);
     await reader.randomRead(apeBuf, 0, TagFooter.len, offset - TagFooter.len);
     const tagFooter = TagFooter.get(apeBuf, 0);
     if (tagFooter.ID === 'APETAGEX') {
@@ -65,7 +64,7 @@ export class APEv2Parser extends BasicParser {
     }
   }
 
-  private static parseTagFooter(metadata: INativeMetadataCollector, buffer: Buffer, options: IOptions): Promise<void> {
+  private static parseTagFooter(metadata: INativeMetadataCollector, buffer: Uint8Array, options: IOptions): Promise<void> {
     const footer = TagFooter.get(buffer, buffer.length - TagFooter.len);
     if (footer.ID !== preamble) throw new Error('Unexpected APEv2 Footer ID preamble value.');
     strtok3.fromBuffer(buffer);
@@ -95,8 +94,8 @@ export class APEv2Parser extends BasicParser {
       if (this.tokenizer.fileInfo.size) {
         // Try to read the APEv2 header using just the footer-header
         const remaining = this.tokenizer.fileInfo.size - this.tokenizer.position; // ToDo: take ID3v1 into account
-        const buffer = Buffer.alloc(remaining);
-        await this.tokenizer.readBuffer(buffer);
+        const buffer = new Uint8Array(remaining);
+        await this.tokenizer.readBuffer(buffer as any);
         return APEv2Parser.parseTagFooter(this.metadata, buffer, this.options);
       }
     }
@@ -117,7 +116,7 @@ export class APEv2Parser extends BasicParser {
 
   public async parseTags(footer: IFooter): Promise<void> {
 
-    const keyBuffer = Buffer.alloc(256); // maximum tag key length
+    const keyBuffer = new Uint8Array(256); // maximum tag key length
 
     let bytesRemaining = footer.size - TagFooter.len;
 
@@ -133,7 +132,7 @@ export class APEv2Parser extends BasicParser {
       const tagItemHeader = await this.tokenizer.readToken<ITagItemHeader>(TagItemHeader);
       bytesRemaining -= TagItemHeader.len + tagItemHeader.size;
 
-      await this.tokenizer.peekBuffer(keyBuffer, {length: Math.min(keyBuffer.length, bytesRemaining)});
+      await this.tokenizer.peekBuffer(keyBuffer as any, {length: Math.min(keyBuffer.length, bytesRemaining)});
       let zero = util.findZero(keyBuffer, 0, keyBuffer.length);
       const key = await this.tokenizer.readToken<string>(new StringType(zero, 'ascii'));
       await this.tokenizer.ignore(1);
@@ -154,13 +153,13 @@ export class APEv2Parser extends BasicParser {
           if (this.options.skipCovers) {
             await this.tokenizer.ignore(tagItemHeader.size);
           } else {
-            const picData = Buffer.alloc(tagItemHeader.size);
-            await this.tokenizer.readBuffer(picData);
+            const picData = new Uint8Array(tagItemHeader.size);
+            await this.tokenizer.readBuffer(picData as any);
 
             zero = util.findZero(picData, 0, picData.length);
-            const description = picData.toString('utf8', 0, zero);
+            const description = new TextDecoder().decode(picData.slice(0, zero));
 
-            const data = Buffer.from(picData.slice(zero + 1));
+            const data = picData.slice(zero + 1);
             this.metadata.addTag(tagFormat, key, {
               description,
               data

@@ -62,7 +62,7 @@ export interface IPageConsumer {
   /**
    * Parse Ogg page
    * @param {IPageHeader} header Ogg page header
-   * @param {Buffer} pageData Ogg page data
+   * @param {Uint8Array} pageData Ogg page data
    */
   parsePage(header: IPageHeader, pageData: Uint8Array);
 

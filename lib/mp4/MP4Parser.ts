@@ -1,6 +1,6 @@
 import initDebug from 'debug';
 import * as Token from 'token-types';
-
+import * as util from "../common/Util.js";
 import { BasicParser } from '../common/BasicParser.js';
 import { Genres } from '../id3v1/ID3v1Parser.js';
 import { Atom } from './Atom.js';
@@ -297,8 +297,8 @@ export class MP4Parser extends BasicParser {
           break;
 
         default:
-          const dataAtom = await this.tokenizer.readToken<Buffer>(new Token.BufferType(payLoadLength));
-          this.addWarning('Unsupported meta-item: ' + tagKey + '[' + child.header.name + '] => value=' + dataAtom.toString('hex') + ' ascii=' + dataAtom.toString('ascii'));
+          const dataAtom = await this.tokenizer.readToken<Uint8Array>(new Token.BufferType(payLoadLength));
+          this.addWarning('Unsupported meta-item: ' + tagKey + '[' + child.header.name + '] => value=' + util.convertToHexString(dataAtom) + ' ascii=' + util.convertToAsciiString(dataAtom));
       }
 
     }, metaAtom.getPayloadLength(0));
@@ -340,7 +340,7 @@ export class MP4Parser extends BasicParser {
 
       case 1: // UTF-8: Without any count or NULL terminator
       case 18: // Unknown: Found in m4b in combination with a '©gen' tag
-        this.addTag(tagKey, dataAtom.value.toString('utf-8'));
+        this.addTag(tagKey, util.convertToUTF8(dataAtom.value));
         break;
 
       case 13: // JPEG
@@ -348,7 +348,7 @@ export class MP4Parser extends BasicParser {
           break;
         this.addTag(tagKey, {
           format: 'image/jpeg',
-          data: Buffer.from(dataAtom.value)
+          data: dataAtom.value
         });
         break;
 
@@ -357,7 +357,7 @@ export class MP4Parser extends BasicParser {
           break;
         this.addTag(tagKey, {
           format: 'image/png',
-          data: Buffer.from(dataAtom.value)
+          data: dataAtom.value
         });
         break;
 
@@ -370,15 +370,15 @@ export class MP4Parser extends BasicParser {
         break;
 
       case 65: // An 8-bit signed integer
-        this.addTag(tagKey, dataAtom.value.readInt8(0));
+        this.addTag(tagKey, new DataView(dataAtom.value.buffer).getInt8(0));
         break;
 
       case 66: // A big-endian 16-bit signed integer
-        this.addTag(tagKey, dataAtom.value.readInt16BE(0));
+        this.addTag(tagKey, new DataView(dataAtom.value.buffer).getInt16(0, false));
         break;
 
       case 67: // A big-endian 32-bit signed integer
-        this.addTag(tagKey, dataAtom.value.readInt32BE(0));
+        this.addTag(tagKey, new DataView(dataAtom.value.buffer).getInt32(0, false));
         break;
 
       default:

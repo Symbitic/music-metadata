@@ -138,7 +138,7 @@ class MpegFrameHeader {
 
   public mp4ChannelConfig: MPEG4ChannelConfiguration;
 
-  public constructor(buf: Buffer, off: number) {
+  public constructor(buf: Uint8Array, off: number) {
     // B(20,19): MPEG Audio versionIndex ID
     this.versionIndex = common.getBitAllignedNumber(buf, off + 1, 3, 2);
     // C(18,17): Layer description
@@ -184,7 +184,7 @@ class MpegFrameHeader {
     return [null, 4, 1, 1][this.layer];
   }
 
-  private parseMpegHeader(buf: Buffer, off: number): void {
+  private parseMpegHeader(buf: Uint8Array, off: number): void {
     this.container = 'MPEG';
     // E(15,12): Bitrate index
     this.bitrateIndex = common.getBitAllignedNumber(buf, off + 2, 0, 4);
@@ -224,7 +224,7 @@ class MpegFrameHeader {
     }
   }
 
-  private parseAdtsHeader(buf: Buffer, off: number): void {
+  private parseAdtsHeader(buf: Uint8Array, off: number): void {
     debug(`layer=0 => ADTS`);
     this.version = this.versionIndex === 2 ? 4 : 2;
     this.container = 'ADTS/MPEG-' + this.version;
@@ -291,7 +291,7 @@ export class MpegParser extends AbstractID3Parser {
   private calculateEofDuration: boolean = false;
   private samplesPerFrame;
 
-  private buf_frame_header = Buffer.alloc(4);
+  private buf_frame_header = new Uint8Array(4);
 
   /**
    * Number of bytes already parsed since beginning of stream / file
@@ -299,7 +299,7 @@ export class MpegParser extends AbstractID3Parser {
   private mpegOffset: number;
 
   private syncPeek = {
-    buf: Buffer.alloc(maxPeekLen),
+    buf: new Uint8Array(maxPeekLen),
     len: 0
   };
 
@@ -360,7 +360,7 @@ export class MpegParser extends AbstractID3Parser {
 
     while (true) {
       let bo = 0;
-      this.syncPeek.len = await this.tokenizer.peekBuffer(this.syncPeek.buf, {length: maxPeekLen, mayBeLess: true});
+      this.syncPeek.len = await this.tokenizer.peekBuffer(this.syncPeek.buf as any, {length: maxPeekLen, mayBeLess: true});
       if (this.syncPeek.len <= 163) {
         throw new EndOfStreamError();
       }
@@ -405,7 +405,7 @@ export class MpegParser extends AbstractID3Parser {
       this.mpegOffset = this.tokenizer.position - 1;
     }
 
-    await this.tokenizer.peekBuffer(this.buf_frame_header, {offset: 1, length: 3});
+    await this.tokenizer.peekBuffer(this.buf_frame_header as any, {offset: 1, length: 3});
 
     let header: MpegFrameHeader;
     try {
@@ -494,8 +494,8 @@ export class MpegParser extends AbstractID3Parser {
   }
 
   private async parseAdts(header: MpegFrameHeader): Promise<boolean> {
-    const buf = Buffer.alloc(3);
-    await this.tokenizer.readBuffer(buf);
+    const buf = new Uint8Array(3);
+    await this.tokenizer.readBuffer(buf as any);
     header.frameLength += common.getBitAllignedNumber(buf, 0, 0, 11);
     this.totalDataLength += header.frameLength;
     this.samplesPerFrame = 1024;

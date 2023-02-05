@@ -94,7 +94,7 @@ export class OggParser extends BasicParser {
         const pageData = await this.tokenizer.readToken<Uint8Array>(new Token.Uint8ArrayType(segmentTable.totalPageSize));
         debug('firstPage=%s, lastPage=%s, continued=%s', header.headerType.firstPage, header.headerType.lastPage, header.headerType.continued);
         if (header.headerType.firstPage) {
-          const id = new Token.StringType(7, 'ascii').get(Buffer.from(pageData), 0);
+          const id = new Token.StringType(7, 'ascii').get(new Uint8Array(pageData), 0);
           switch (id) {
             case '\x01vorbis': // Ogg/Vorbis
               debug('Set page consumer to Ogg/Vorbis');

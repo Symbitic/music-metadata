@@ -1,5 +1,3 @@
-import { Buffer } from 'node:buffer';
-
 import { GenericTagId, TagType } from './common/GenericTagTypes.js';
 import { IFooter } from './apev2/APEv2Token.js';
 import { TrackType } from './matroska/types.js';
@@ -17,7 +15,7 @@ export interface IPicture {
   /**
    * Image data
    */
-  data: Buffer;
+  data: Uint8Array;
   /**
    * Optional description
    */
@@ -390,7 +388,7 @@ export interface IAudioTrack {
   samplingFrequency?: number;
   outputSamplingFrequency?: number;
   channels?: number;
-  channelPositions?: Buffer;
+  channelPositions?: Uint8Array;
   bitDepth?: number;
 }
 
@@ -403,7 +401,7 @@ export interface IVideoTrack {
   displayHeight?: number;
   displayUnit?: number;
   aspectRatioType?: number;
-  colourSpace?: Buffer;
+  colourSpace?: Uint8Array;
   gammaValue?: number;
 }
 
@@ -486,7 +484,7 @@ export interface IFormat {
   /**
    * 16-byte MD5 of raw audio
    */
-  readonly audioMD5?: Buffer;
+  readonly audioMD5?: Uint8Array;
 
   /**
    * Chapters in audio stream
@@ -679,11 +677,11 @@ export interface IRandomReader {
 
   /**
    * Read from a given position of an abstracted file or buffer.
-   * @param buffer {Buffer} is the buffer that the data will be written to.
+   * @param buffer {Uint8Array} is the buffer that the data will be written to.
    * @param offset {number} is the offset in the buffer to start writing at.
    * @param length {number}is an integer specifying the number of bytes to read.
    * @param position {number} is an argument specifying where to begin reading from in the file.
    * @return {Promise<number>} bytes read
    */
-  randomRead(buffer: Buffer, offset: number, length: number, position: number): Promise<number>;
+  randomRead(buffer: Uint8Array, offset: number, length: number, position: number): Promise<number>;
 }
