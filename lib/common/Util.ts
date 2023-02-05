@@ -59,26 +59,17 @@ function swapBytes<T extends Uint8Array>(uint8Array: T): T {
   return uint8Array;
 }
 
-//import {convertToUTF16LE, convertFromAB, copyUint8Array, convertToBinaryString, convertFromBinaryString, readUintBE, convertToAsciiString, convertToHexString, convertToUTF8, convertFromBase64, concat } from "../Utils";
+const utf16LeDecoder = new TextDecoder('utf-16le');
+const asciiDecoder = new TextDecoder('ascii');
+const utf8Decoder = new TextDecoder('utf-8');
+const latin1Decoder = new TextDecoder('latin1');
 
 export function convertToUTF16LE(buf: Uint8Array): string {
-  return new TextDecoder('utf-16le').decode(buf);
-}
-
-export function convertFromAB(ab: ArrayBuffer): Uint8Array {
-  return new Uint8Array(ab);
-}
-
-export function copyUint8Array(buf: Uint8Array): Uint8Array {
-  return new Uint8Array(buf);
+  return utf16LeDecoder.decode(buf);
 }
 
 export function convertToBinaryString(buf: Uint8Array, start?: number, end?: number): string {
   return Array.from(buf.slice(start, end)).map((i) => String.fromCharCode(i)).join('');
-}
-
-export function convertFromBinaryString(str: string): Uint8Array {
-  return new Uint8Array(str.split('').map(char => char.charCodeAt(0)));
 }
 
 export function readUintBE(buf: Uint8Array, start: number, end: number): number {
@@ -90,7 +81,7 @@ export function readUintBE(buf: Uint8Array, start: number, end: number): number 
 }
 
 export function convertToAsciiString(buf: Uint8Array): string {
-  return new TextDecoder('ascii').decode(buf);
+  return asciiDecoder.decode(buf);
 }
 
 export function convertToHexString(buf: Uint8Array): string {
@@ -102,11 +93,11 @@ export function convertToHexString(buf: Uint8Array): string {
 }
 
 export function convertToUTF8(buf: Uint8Array, start?: number, end?: number): string {
-  return new TextDecoder('utf-8').decode(buf.slice(start, end));
+  return utf8Decoder.decode(buf.slice(start, end));
 }
 
 export function convertToLatin1(buf: Uint8Array, start?: number, end?: number): string {
-  return new TextDecoder('latin1').decode(buf.slice(start, end));
+  return latin1Decoder.decode(buf.slice(start, end));
 }
 
 export function convertFromBase64(base64str: string): Uint8Array {
